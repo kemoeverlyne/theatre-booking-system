@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'cip&9sj4n$vo+obev5s6attw^6&029f1ruf=eyb1d&1sg@9h1d'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -83,9 +83,17 @@ WSGI_APPLICATION = 'theatre_booking_system.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+       "ENGINE": os.environ.get(
+                "DB_ENGINE", "django.db.backends.postgresql_psycopg2"
+            ),
+            "NAME": os.environ.get("DB_NAME"),
+            "USER": os.environ.get("DB_USER"),
+            "PASSWORD": os.environ.get("DB_PASSWORD"),
+            "HOST": os.environ.get("DB_HOST"),
+            "PORT": os.environ.get("DB_PORT", 5432),
+            "CONN_MAX_AGE": os.environ.get("DB_CONN_MAX_AGE", 2),
+            "ATOMIC_REQUESTS": os.environ.get("ATOMIC_REQUESTS", False),
+        }
 }
 
 
