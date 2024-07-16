@@ -72,9 +72,9 @@ cd repository
 Install dependencies:
 
 pip install -r requirements.txt
-Set up PostgreSQL and Redis according to your environment.
+- Set up PostgreSQL and Redis according to your environment.
 
-Apply database migrations:
+- Apply database migrations:
 
 python manage.py migrate
 
