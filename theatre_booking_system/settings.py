@@ -165,7 +165,7 @@ CELERY_ALWAYS_EAGER = env.bool("CELERY_ALWAYS_EAGER", False)
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_BEAT_SCHEDULE = {
     "add-every-30-seconds": {
-        "task": "apps.accounts.tasks.add",
+        "task": "booking.tasks.add",
         "schedule": 30.0,
         "args": (16, 16),
         "options": {
