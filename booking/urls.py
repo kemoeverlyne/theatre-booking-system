@@ -2,8 +2,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     HomeView, SignupView, LoginView, LogoutView,
-    TheaterListCreateAPIView, ShowListCreateAPIView, SeatListCreateAPIView,
-    ReservationCreateAPIView, BookTicketsAPIView
+    TheaterCreateAPIView, TheaterListAPIView, ShowListAPIView,ShowCreateAPIView, SeatListCreateAPIView,
+    ReservationCreateAPIView, BookTicketsAPIView, ReservationListAPIView
 )
 
 # Router for ViewSets
@@ -17,9 +17,12 @@ urlpatterns = [
     
     # API endpoints
     path('api/', include(router.urls)),
-    path('api/theaters/', TheaterListCreateAPIView.as_view(), name='theater-list-create'),
-    path('api/shows/', ShowListCreateAPIView.as_view(), name='show-list-create'),
+    path('api/theaters/add', TheaterCreateAPIView.as_view(), name='theater-create'),
+    path('api/theaters/', TheaterListAPIView.as_view(), name='theater-list'),
+    path('api/shows/add', ShowCreateAPIView.as_view(), name='show-create'),
+    path('api/shows/', ShowListAPIView.as_view(), name='show-list'),
     path('api/seats/', SeatListCreateAPIView.as_view(), name='seat-list-create'),
-    path('api/reservations/', ReservationCreateAPIView.as_view(), name='reservation-list-create'),
+    path('api/reservations/', ReservationListAPIView.as_view(), name='reservation-list'),
+    path('api/reservations/add', ReservationCreateAPIView.as_view(), name='reservation-create'),
     path('api/tickets/', BookTicketsAPIView.as_view(), name='ticket-list-create'),
 ]

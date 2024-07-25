@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic import View
 from rest_framework.views import APIView
@@ -11,7 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Theater, Show, Seat, Reservation
 from .serializers import (
     TheaterSerializer, ShowSerializer, SeatSerializer,
-    ReservationSerializer, UserSerializer
+    ReservationSerializer
 )
 
 class HomeView(View):
@@ -97,6 +97,7 @@ class TheaterCreateAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class TheaterListAPIView(APIView):
+
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -112,7 +113,7 @@ class TheaterListAPIView(APIView):
         serializer = TheaterSerializer(theaters, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class ShowListCreateAPIView(APIView):
+class ShowListAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -123,6 +124,9 @@ class ShowListCreateAPIView(APIView):
             shows = Show.objects.all()
         serializer = ShowSerializer(shows, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ShowCreateAPIView(APIView):
+    permission_classes = [IsAdminUser]
 
     def post(self, request):
         serializer = ShowSerializer(data=request.data)
@@ -150,6 +154,14 @@ class SeatListCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class ReservationListAPIView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        reservations = Reservation.objects.filter(user=request.user)
+        serializer = ReservationSerializer(reservations, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
 class ReservationCreateAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
