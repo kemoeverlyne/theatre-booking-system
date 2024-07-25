@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 import django.utils.translation as original_translation
 from django.utils.translation import gettext_lazy
+from django.core.management.utils import get_random_secret_key
+
 
 original_translation.ugettext_lazy = gettext_lazy
 
@@ -24,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'debug_toolbar',
     'drf_yasg',
     'booking',
 ]
@@ -55,6 +58,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+
 ]
 
 ROOT_URLCONF = 'theatre_booking_system.urls'
@@ -77,25 +82,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'theatre_booking_system.wsgi.application'
 
+TESTING = True
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-       "ENGINE": os.environ.get(
+if os.getenv("DB_NAME"):
+    DATABASES = {
+        "default": {
+            "ENGINE": os.getenv(
                 "DB_ENGINE", "django.db.backends.postgresql_psycopg2"
             ),
-            "NAME": os.environ.get("DB_NAME"),
-            "USER": os.environ.get("DB_USER"),
-            "PASSWORD": os.environ.get("DB_PASSWORD"),
-            "HOST": os.environ.get("DB_HOST"),
-            "PORT": os.environ.get("DB_PORT", 5432),
-            "CONN_MAX_AGE": os.environ.get("DB_CONN_MAX_AGE", 2),
-            "ATOMIC_REQUESTS": os.environ.get("ATOMIC_REQUESTS", False),
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": os.getenv.int("DB_PORT", 5432),
+            "CONN_MAX_AGE": os.getenv.int("DB_CONN_MAX_AGE", 2),
+            "ATOMIC_REQUESTS": os.getenv.bool("ATOMIC_REQUESTS", False),
         }
-}
-
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
@@ -148,18 +161,18 @@ STATIC_URL = '/static/'
 
 
 # Redis URL
-REDIS_DB_URL = env.str("REDIS_DB_URL", "redis://localhost:6379")
+REDIS_DB_URL = os.environ.get("REDIS_DB_URL", "redis://localhost:6379")
 
 #CELERY
-CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", REDIS_DB_URL)
-CELERY_RESULT_BACKEND = env.str("CELERY_RESULT_BACKEND", REDIS_DB_URL)
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", REDIS_DB_URL)
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", REDIS_DB_URL)
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
-CELERY_ALWAYS_EAGER = env.bool("CELERY_ALWAYS_EAGER", False)
+CELERY_ALWAYS_EAGER = os.environ.get("CELERY_ALWAYS_EAGER", False)
 
 # Celery Beat
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
@@ -172,4 +185,17 @@ CELERY_BEAT_SCHEDULE = {
             "expires": 15.0,
         },
     },
+}
+
+CACHEOPS_REDIS = {
+    'host': 'localhost',  # Replace with your Redis server address
+    'port': 6379,         # Default Redis port
+    'db': 1,              # Redis database number
+    'socket_timeout': 3,  # Timeout in seconds
+}
+
+CACHEOPS = {
+    'auth.*': {'ops': 'all', 'timeout': 60*15},
+    'auth.user': {'ops': 'get', 'timeout': 60*15},
+    # Your model caching settings go here
 }

@@ -51,7 +51,7 @@ class LoginView(View):
         return render(request, 'registration/login.html', {'form': form})
 
 @login_required
-def logout_view(request):
+def LogoutView(request):
     logout(request)
     return redirect('home')
 

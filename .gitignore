@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables file
+.env
+
+# Django migration files
+*/migrations/
+
+# Database files
+db.sqlite3
+
+
+# IDE and editor settings
+.vscode/
+.idea/
+*.swp
+.DS_Store

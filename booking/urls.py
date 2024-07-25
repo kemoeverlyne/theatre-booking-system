@@ -3,18 +3,17 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     HomeView, SignupView, LoginView, LogoutView,
     TheaterListCreateAPIView, ShowListCreateAPIView, SeatListCreateAPIView,
-    ReservationCreateAPIView, BookTicketsAPIView, UserViewSet
+    ReservationCreateAPIView, BookTicketsAPIView
 )
 
 # Router for ViewSets
 router = DefaultRouter()
-router.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('signup/', SignupView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    path('logout/', LogoutView, name='logout'),
     
     # API endpoints
     path('api/', include(router.urls)),
