@@ -6,6 +6,7 @@ from django.views.generic import View
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
+from rest_framework.permissions import IsAdminUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Theater, Show, Seat, Reservation
 from .serializers import (
@@ -84,7 +85,18 @@ def book_tickets(request, reservation_id):
     return render(request, 'booking/book_tickets.html', {'reservation_id': reservation_id})
 
 # API views
-class TheaterListCreateAPIView(APIView):
+
+class TheaterCreateAPIView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        serializer = TheaterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class TheaterListAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -93,15 +105,12 @@ class TheaterListCreateAPIView(APIView):
             theaters = Theater.objects.filter(location=location)
         else:
             theaters = Theater.objects.all()
+
+        if not theaters:
+            return Response({'message': 'No theaters found'}, status=status.HTTP_404_NOT_FOUND)
+        
         serializer = TheaterSerializer(theaters, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        serializer = TheaterSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ShowListCreateAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
